@@ -86,6 +86,8 @@ module BigQuery
     private
 
     def api(resp)
+      resp = Zlib::GzipReader.new(StringIO.new(resp)).read if resp[0..1].bytes == "\x1F\x8B".bytes # GZIP header
+      resp = Oj.load(resp)
       data = deep_stringify_keys(resp.to_h)
       handle_error(data) if data && is_error?(data)
       data
